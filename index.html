@@ -252,13 +252,14 @@
         /* Add styles for history section */
         .history-container {
             flex: 3;
-            min-width: 800px;
+            min-width: 850px;
             background: var(--container-bg);
             border-radius: 16px;
             box-shadow: 0 4px 6px var(--shadow-color);
             padding: 24px 24px 24px 16px;
             transition: all 0.3s ease;
             margin-bottom: 0;
+            margin-left: 35px;
         }
 
         .history-container:hover {
@@ -388,6 +389,7 @@
             display: flex;
             gap: 120px;
             padding: 0 8px;
+            margin-left: 40px;
         }
 
         .countdown-container {
@@ -497,9 +499,9 @@
             box-shadow: 0 4px 6px var(--shadow-color);
             padding: 10px;
             transition: all 0.3s ease;
-            width: 340px;
+            width: 330px;
             margin-top: 0;
-            margin-left: 40px;
+            margin-left: 50px;
         }
 
         .calendar-header {
@@ -933,6 +935,7 @@
                 <option value="9702">🍏 Physics</option>
                 <option value="9701">🧪 Chemistry</option>
                 <option value="9618">💻 Computer Science</option>
+                <option value="9608">💻 Computer (before 2021)</option>
                 <option value="9709">📐 Mathematics</option>
                 <option value="8021">📖 English General Paper</option>
             </select>
@@ -963,6 +966,8 @@
             <select id="paperType" tabindex="5" onkeydown="handleKeyDown(event, 'submitButton')">
                 <option value="ms">Marking Scheme (ms)</option>
                 <option value="qp">Question Paper (qp)</option>
+                <option value="in">Insert (in)</option>
+                <option value="sf">Source File (sf)</option>
             </select>
         </div>
 
@@ -1097,15 +1102,22 @@
             // Save to history
             saveToHistory({ subjectCode, component, session, year, paperType });
 
-            // Construct and open URL
-            const url = `https://pastpapers.papacambridge.com/directories/CAIE/CAIE-pastpapers/upload/${subjectCode}_${session}${year}_${paperType}_${component}.pdf`;
-            window.open(url, '_blank');
+            let url;
+            if (paperType === 'sf') {
+                // Construct source file URL for Computer Science
+                const sessionText = session === 's' ? 'may-june' : 'oct-nov';
+                const yearFull = `20${year}`;
+                url = `https://pastpapers.papacambridge.com/papers/caie/as-and-a-level-computer-science-for-first-examination-in-2021-${subjectCode}-${yearFull}-${sessionText}`;
+            } else if (paperType === 'in') {
+                // Construct insert paper URL
+                url = `https://pastpapers.papacambridge.com/directories/CAIE/CAIE-pastpapers/upload/${subjectCode}_${session}${year}_${paperType}_${component}.pdf`;
+            } else {
+                // Construct regular past paper URL
+                url = `https://pastpapers.papacambridge.com/directories/CAIE/CAIE-pastpapers/upload/${subjectCode}_${session}${year}_${paperType}_${component}.pdf`;
+            }
 
-            // Reset focus to subject code dropdown
+            window.open(url, '_blank');
             document.getElementById('subjectCode').focus();
-            
-            // Clear the component input
-            document.getElementById('component').value = '';
         }
 
         // Update theme toggle functionality
@@ -1144,6 +1156,7 @@
                 '9702': '🍏 Physics',
                 '9701': '🧪 Chemistry',
                 '9618': '💻 Computer Science',
+                '9608': '💻 Computer (before 2021)',
                 '9709': '📐 Mathematics',
                 '8021': '📖 English General Paper'
             };
@@ -1237,24 +1250,67 @@
             // If Enter is pressed
             if (event.key === 'Enter') {
                 event.preventDefault();
-                
-                // If there's a next element, focus it
-                if (nextElementId) {
-                    document.getElementById(nextElementId).focus();
-                }
-                // If it's the submit button, trigger click
-                else if (event.target.id === 'submitButton') {
-                    openPastPaper();
-                }
+                openPastPaper();
+                return;
             }
             // If Tab is pressed
             else if (event.key === 'Tab' && !event.shiftKey) {
                 event.preventDefault();
+                // Skip submitButton and cycle back to first field
+                if (nextElementId === 'submitButton') {
+                    document.getElementById('subjectCode').focus();
+                    return;
+                }
                 if (nextElementId) {
                     document.getElementById(nextElementId).focus();
                 }
             }
+            // Handle left/right arrow keys for navigation between fields
+            else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+                const fields = ['subjectCode', 'component', 'session', 'year', 'paperType'];
+                const currentIndex = fields.indexOf(event.target.id);
+                
+                if (currentIndex !== -1) {
+                    event.preventDefault();
+                    let newIndex;
+                    
+                    if (event.key === 'ArrowLeft') {
+                        newIndex = currentIndex > 0 ? currentIndex - 1 : fields.length - 1;
+                    } else {
+                        newIndex = currentIndex < fields.length - 1 ? currentIndex + 1 : 0;
+                    }
+                    
+                    document.getElementById(fields[newIndex]).focus();
+                }
+            }
+            // Let up/down arrows handle dropdown selection
+            else if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                if (event.target.tagName === 'SELECT') {
+                    event.target.dataset.arrowSelection = true;
+                }
+            }
         }
+
+        // Update the dropdown handlers
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', function() {
+                // Don't automatically move focus on arrow key selection
+                if (!this.dataset.arrowSelection) {
+                    const nextId = this.getAttribute('onkeydown').match(/'([^']+)'/)[1];
+                    if (nextId) {
+                        document.getElementById(nextId).focus();
+                    }
+                }
+                this.dataset.arrowSelection = false;
+            });
+
+            // Track if change was triggered by arrow keys
+            select.addEventListener('keydown', function(e) {
+                if (e.key.startsWith('Arrow')) {
+                    this.dataset.arrowSelection = true;
+                }
+            });
+        });
 
         let currentDate = new Date();
         let currentMonth = currentDate.getMonth();
