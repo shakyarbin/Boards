@@ -649,24 +649,35 @@
 
         .date-tooltip {
             position: absolute;
-            background: white;
+            background: var(--container-bg);
             padding: 8px 12px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             z-index: 100;
-            min-width: 120px;
+            width: max-content;
+            max-width: 200px;
             opacity: 0;
             visibility: hidden;
             bottom: calc(100% + 10px);
             left: 50%;
             transform: translateX(-50%);
-            text-align: center;
-            border: none;
-            font-size: 14px;
-            color: #333;
-            white-space: nowrap;
+            text-align: left;
+            border: 1px solid var(--border-color);
+            font-size: 12px;
+            color: var(--text-color);
             pointer-events: none;
             transition: opacity 0.2s, visibility 0.2s;
+            white-space: nowrap;
+        }
+
+        .date-tooltip div {
+            margin: 4px 0;
+            white-space: nowrap;
+        }
+
+        .date-tooltip div:not(:last-child) {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 4px;
         }
 
         .calendar-day:hover .date-tooltip {
@@ -1425,6 +1436,12 @@
                 details: 'Chemistry P4'
             },
             {
+                date: new Date(2025, 4, 9), // May 9
+                type: 'exam',
+                subject: 'Physics',
+                details: 'Physics P4'
+            },
+            {
                 date: new Date(2025, 4, 19), // May 19
                 type: 'exam',
                 subject: 'Chemistry',
@@ -1531,20 +1548,21 @@
                         dayElement.setAttribute('data-subject', importantDate.subject);
                     }
                     
-                    // Add tooltip with subject and paper details
+                    // Find all events for this date
+                    const allEventsForDate = importantDates.filter(date => 
+                        date.date.toDateString() === currentDateString
+                    );
+                    
+                    // Create tooltip with only details
                     const tooltip = document.createElement('div');
                     tooltip.className = 'date-tooltip';
-                    tooltip.innerHTML = `${importantDate.subject} ${importantDate.details.split(' ').pop()}`;
+                    tooltip.innerHTML = allEventsForDate.map(event => 
+                        `<div>${event.details}</div>`
+                    ).join('');
                     dayElement.appendChild(tooltip);
                 }
 
-                dayElement.addEventListener('click', () => {
-                    const clickedDate = new Date(year, month, i);
-                    if (importantDate) {
-                        alert(`${importantDate.subject}: ${importantDate.details}`);
-                    }
-                });
-
+                // Remove click event handler
                 calendarDays.appendChild(dayElement);
             }
         }
