@@ -1333,81 +1333,51 @@
         const importantDates = [
             // Mock Exam Period
             { 
-                date: new Date(2025, 2, 16), // March 16
+                date: new Date(2025, 2, 17),
                 type: 'exam',
-                subject: 'Mock',
-                details: 'Mock Exam Start'
+                subject: 'Maths P32',
+                details: 'Mock Exam'
             },
             { 
                 date: new Date(2025, 2, 17),
                 type: 'exam',
-                subject: 'Mock',
-                details: 'Mock Exam'
-            },
-            { 
-                date: new Date(2025, 2, 18),
-                type: 'exam',
-                subject: 'Mock',
-                details: 'Mock Exam'
-            },
-            { 
-                date: new Date(2025, 2, 19),
-                type: 'exam',
-                subject: 'Mock',
-                details: 'Mock Exam'
-            },
-            { 
-                date: new Date(2025, 2, 20),
-                type: 'exam',
-                subject: 'Mock',
-                details: 'Mock Exam'
-            },
-            { 
-                date: new Date(2025, 2, 21),
-                type: 'exam',
-                subject: 'Mock',
-                details: 'Mock Exam'
-            },
-            { 
-                date: new Date(2025, 2, 22),
-                type: 'exam',
-                subject: 'Mock',
+                subject: 'Maths P42',
                 details: 'Mock Exam'
             },
             { 
                 date: new Date(2025, 2, 23),
                 type: 'exam',
-                subject: 'Mock',
+                subject: 'Computer 42',
                 details: 'Mock Exam'
             },
             { 
                 date: new Date(2025, 2, 24),
                 type: 'exam',
-                subject: 'Mock',
-                details: 'Mock Exam'
-            },
-            { 
-                date: new Date(2025, 2, 25),
-                type: 'exam',
-                subject: 'Mock',
-                details: 'Mock Exam'
-            },
-            { 
-                date: new Date(2025, 2, 26),
-                type: 'exam',
-                subject: 'Mock',
+                subject: 'Computer P32',
                 details: 'Mock Exam'
             },
             { 
                 date: new Date(2025, 2, 27),
                 type: 'exam',
-                subject: 'Mock',
+                subject: 'Chemistry P42',
+                details: 'Mock Exam'
+            },
+            { 
+                date: new Date(2025, 2, 27),
+                type: 'exam',
+                subject: 'Chemistry P52',
                 details: 'Mock Exam'
             },
             { 
                 date: new Date(2025, 2, 28), // March 28
                 type: 'exam',
-                subject: 'Mock',
+                subject: 'EGP P12',
+                details: 'Mock Exam End'
+            },
+            { 
+                date: new Date(2025, 2, 28), // March 28
+                type: 'exam',
+                subject: 'EGP P22',
                 details: 'Mock Exam End'
             },
             // Final Exams
@@ -1553,12 +1523,16 @@
                         date.date.toDateString() === currentDateString
                     );
                     
-                    // Create tooltip with only details
+                    // Create tooltip with subject (for Mock) or details (for Finals)
                     const tooltip = document.createElement('div');
                     tooltip.className = 'date-tooltip';
-                    tooltip.innerHTML = allEventsForDate.map(event => 
-                        `<div>${event.details}</div>`
-                    ).join('');
+                    tooltip.innerHTML = allEventsForDate.map(event => {
+                        if (event.date >= new Date(2025, 3, 29)) { // April 29th and after are Finals
+                            return `<div>${event.details}</div>`;
+                        } else {
+                            return `<div>${event.subject}</div>`;
+                        }
+                    }).join('');
                     dayElement.appendChild(tooltip);
                 }
 
